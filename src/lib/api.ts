@@ -17,7 +17,6 @@ export type AdminUser = {
   account_locked_until?: string | null;
   date_joined?: string;
 };
-
 export type AuthSession = {
   user: AdminUser;
   accessToken: string;
