@@ -21,7 +21,12 @@ export default function AuthGuard({ children }: { children: ReactNode }) {
       }
 
       try {
-        await syncCurrentSession(session);
+        const nextSession = await syncCurrentSession(session);
+        if (!nextSession.user.is_superuser) {
+          clearStoredSession();
+          router.replace("/login");
+          return;
+        }
         if (!cancelled) {
           setReady(true);
         }

@@ -1,6 +1,10 @@
-export const API_BASE_URL = (
+const RAW_API_BASE_URL = (
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://backenddevmasters-production.up.railway.app/api/v1"
-).replace(/\/$/, "");
+).replace(/\/+$/, "");
+
+export const API_BASE_URL = RAW_API_BASE_URL.endsWith("/api/v1")
+  ? RAW_API_BASE_URL
+  : `${RAW_API_BASE_URL}/api/v1`;
 
 const SESSION_STORAGE_KEY = "admin-dashboard.session";
 
@@ -219,7 +223,8 @@ export class ApiError extends Error {
 }
 
 function buildUrl(path: string, query?: Record<string, string | number | undefined>) {
-  const url = new URL(path, `${API_BASE_URL}/`);
+  const normalizedPath = path.replace(/^\/+/, "");
+  const url = new URL(normalizedPath, `${API_BASE_URL}/`);
 
   if (query) {
     for (const [key, value] of Object.entries(query)) {
@@ -269,6 +274,7 @@ async function request<T>(path: string, options: RequestOptions = {}) {
     method,
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
+    credentials: "include",
     signal,
   });
 
@@ -319,7 +325,7 @@ export function clearStoredSession() {
 }
 
 export async function login(email: string, password: string) {
-  return request<LoginResponse>("/api/v1/auth/login/", {
+  return request<LoginResponse>("/auth/login/", {
     method: "POST",
     body: { email, password },
   });
@@ -327,7 +333,7 @@ export async function login(email: string, password: string) {
 
 export async function registerUser(payload: RegisterPayload) {
   return request<{ message: string; email_verification_required?: boolean }>(
-    "/api/v1/auth/register/",
+    "/auth/register/",
     {
       method: "POST",
       body: payload,
@@ -336,21 +342,21 @@ export async function registerUser(payload: RegisterPayload) {
 }
 
 export async function verifyTwoFactorLogin(userId: number, otp: string) {
-  return request<Extract<LoginResponse, { user: AdminUser }>>("/api/v1/auth/2fa/login/", {
+  return request<Extract<LoginResponse, { user: AdminUser }>>("/auth/2fa/login/", {
     method: "POST",
     body: { user_id: userId, otp },
   });
 }
 
 export async function setupTwoFactor(token: string) {
-  return request<TwoFactorSetupResponse>("/api/v1/auth/2fa/setup/", {
+  return request<TwoFactorSetupResponse>("/auth/2fa/setup/", {
     method: "POST",
     token,
   });
 }
 
 export async function verifyTwoFactorSetup(token: string, otp: string) {
-  return request<ApiMessage>("/api/v1/auth/2fa/verify/", {
+  return request<ApiMessage>("/auth/2fa/verify/", {
     method: "POST",
     token,
     body: { otp },
@@ -358,55 +364,55 @@ export async function verifyTwoFactorSetup(token: string, otp: string) {
 }
 
 export async function verifyEmail(uid: string, token: string) {
-  return request<{ message: string }>("/api/v1/auth/verify-email/", {
+  return request<{ message: string }>("/auth/verify-email/", {
     query: { uid, token },
   });
 }
 
 export async function resendVerificationEmail(email: string) {
-  return request<ApiMessage>("/api/v1/auth/resend-verification/", {
+  return request<ApiMessage>("/auth/resend-verification/", {
     method: "POST",
     body: { email },
   });
 }
 
 export async function forgotPassword(email: string) {
-  return request<ApiMessage>("/api/v1/auth/forgot-password/", {
+  return request<ApiMessage>("/auth/forgot-password/", {
     method: "POST",
     body: { email },
   });
 }
 
 export async function resetPassword(uid: string, token: string, newPassword: string) {
-  return request<ApiMessage>("/api/v1/auth/reset-password/", {
+  return request<ApiMessage>("/auth/reset-password/", {
     method: "POST",
     body: { uid, token, new_password: newPassword },
   });
 }
 
 export async function refreshAccessToken(refreshToken: string) {
-  return request<RefreshResponse>("/api/v1/auth/refresh/", {
+  return request<RefreshResponse>("/auth/token/refresh/", {
     method: "POST",
     body: { refresh: refreshToken },
   });
 }
 
 export async function refreshAccessTokenFromTokenEndpoint(refreshToken: string) {
-  return request<RefreshResponse>("/api/v1/auth/token/refresh/", {
+  return request<RefreshResponse>("/auth/token/refresh/", {
     method: "POST",
     body: { refresh: refreshToken },
   });
 }
 
 export async function verifyJwtToken(token: string) {
-  return request<Record<string, never>>("/api/v1/auth/verify/", {
+  return request<Record<string, never>>("/auth/verify/", {
     method: "POST",
     body: { token },
   });
 }
 
 export async function logout(token: string, refreshToken: string) {
-  return request<{ detail: string }>("/api/v1/auth/logout/", {
+  return request<{ detail: string }>("/auth/logout/", {
     method: "POST",
     token,
     body: { refresh: refreshToken },
@@ -414,23 +420,23 @@ export async function logout(token: string, refreshToken: string) {
 }
 
 export async function fetchCurrentUser(token: string) {
-  return request<AdminUser>("/api/v1/auth/me/", { token });
+  return request<AdminUser>("/auth/me/", { token });
 }
 
 export async function fetchLiveness(signal?: AbortSignal) {
-  return request<LivenessStatus>("/api/v1/core/health/live/", { signal });
+  return request<LivenessStatus>("/core/health/live/", { signal });
 }
 
 export async function fetchReadiness(signal?: AbortSignal) {
-  return request<ReadinessStatus>("/api/v1/core/health/ready/", { signal });
+  return request<ReadinessStatus>("/core/health/ready/", { signal });
 }
 
 export async function fetchVersions(signal?: AbortSignal) {
-  return request<ApiVersions>("/api/v1/core/versions/", { signal });
+  return request<ApiVersions>("/core/versions/", { signal });
 }
 
 export async function fetchCoreMetrics(token: string, signal?: AbortSignal) {
-  return request<CoreMetrics>("/api/v1/core/metrics/", { token, signal });
+  return request<CoreMetrics>("/core/metrics/", { token, signal });
 }
 
 export async function fetchAdminUsers(
@@ -449,7 +455,7 @@ export async function fetchAdminUsers(
         total_pages?: number;
         current_page?: number;
       }
-  >("/api/v1/auth/admin/users/", {
+  >("/auth/admin/users/", {
     token,
     query: { page, search },
     signal,
@@ -486,7 +492,7 @@ export async function fetchAdminUsers(
 }
 
 export async function suspendUser(token: string, userId: number) {
-  return request<{ status: string }>("/api/v1/auth/suspend/", {
+  return request<{ status: string }>("/auth/suspend/", {
     method: "POST",
     token,
     body: { user_id: userId },
@@ -495,7 +501,7 @@ export async function suspendUser(token: string, userId: number) {
 
 export async function restoreUser(token: string, userId: number) {
   return request<{ status: string; is_active: boolean }>(
-    `/api/v1/auth/users/${userId}/restore/`,
+    `/auth/users/${userId}/restore/`,
     {
       method: "POST",
       token,
@@ -504,7 +510,7 @@ export async function restoreUser(token: string, userId: number) {
 }
 
 export async function toggleStaff(token: string, userId: number) {
-  return request<{ status: string; is_staff: boolean }>("/api/v1/auth/admin/toggle-user/", {
+  return request<{ status: string; is_staff: boolean }>("/auth/admin/toggle-user/", {
     method: "POST",
     token,
     body: { user_id: userId },
@@ -512,29 +518,29 @@ export async function toggleStaff(token: string, userId: number) {
 }
 
 export async function fetchSecurityDashboard(token: string, signal?: AbortSignal) {
-  return request<SecurityDashboard>("/api/v1/security/dashboard/", { token, signal });
+  return request<SecurityDashboard>("/security/dashboard/", { token, signal });
 }
 
 export async function fetchSuspiciousLogins(token: string, signal?: AbortSignal) {
-  return request<SuspiciousLogin[]>("/api/v1/security/suspicious-logins/", {
+  return request<SuspiciousLogin[]>("/security/suspicious-logins/", {
     token,
     signal,
   });
 }
 
 export async function fetchTopAttackingIps(token: string, signal?: AbortSignal) {
-  return request<TopAttackingIp[]>("/api/v1/security/top-attacking-ips/", {
+  return request<TopAttackingIp[]>("/security/top-attacking-ips/", {
     token,
     signal,
   });
 }
 
 export async function fetchBlockedIps(token: string, signal?: AbortSignal) {
-  return request<BlockedIp[]>("/api/v1/security/blocked-ips/", { token, signal });
+  return request<BlockedIp[]>("/security/blocked-ips/", { token, signal });
 }
 
 export async function unblockIp(token: string, ip: string) {
-  return request<ApiMessage>("/api/v1/security/unblock-ip/", {
+  return request<ApiMessage>("/security/unblock-ip/", {
     method: "POST",
     token,
     body: { ip },
@@ -542,15 +548,15 @@ export async function unblockIp(token: string, ip: string) {
 }
 
 export async function fetchLoginTrend(token: string, signal?: AbortSignal) {
-  return request<LoginTrendPoint[]>("/api/v1/security/login-trend/", { token, signal });
+  return request<LoginTrendPoint[]>("/security/login-trend/", { token, signal });
 }
 
 export async function fetchSecurityAlerts(token: string, signal?: AbortSignal) {
-  return request<SecurityAlert[]>("/api/v1/security/alerts/", { token, signal });
+  return request<SecurityAlert[]>("/security/alerts/", { token, signal });
 }
 
 export async function resolveSecurityAlert(token: string, alertId: number) {
-  return request<ApiMessage>("/api/v1/security/resolve-alert/", {
+  return request<ApiMessage>("/security/resolve-alert/", {
     method: "POST",
     token,
     body: { alert_id: alertId },
@@ -558,7 +564,7 @@ export async function resolveSecurityAlert(token: string, alertId: number) {
 }
 
 export async function unlockUser(token: string, userId: number) {
-  return request<ApiMessage>("/api/v1/security/unlock-user/", {
+  return request<ApiMessage>("/security/unlock-user/", {
     method: "POST",
     token,
     body: { user_id: userId },
@@ -576,7 +582,7 @@ export async function fetchAuditLogs(token: string, page = 1, signal?: AbortSign
         total_pages?: number;
         current_page?: number;
       }
-  >("/api/v1/audit/", { token, signal, query: { page } });
+  >("/audit/", { token, signal, query: { page } });
 
   if (Array.isArray(payload)) {
     return {
@@ -603,7 +609,7 @@ export async function fetchAuditLogs(token: string, page = 1, signal?: AbortSign
 }
 
 export async function fetchAdminUser(token: string, userId: number, signal?: AbortSignal) {
-  return request<AdminUser>(`/api/v1/auth/admin/users/${userId}/`, {
+  return request<AdminUser>(`/auth/admin/users/${userId}/`, {
     token,
     signal,
   });
@@ -615,7 +621,7 @@ export async function updateAdminUser(
   body: UpdateAdminUserPayload,
   signal?: AbortSignal,
 ) {
-  return request<AdminUser>(`/api/v1/auth/${userId}/`, {
+  return request<AdminUser>(`/auth/${userId}/`, {
     method: "PATCH",
     token,
     body,
@@ -624,14 +630,14 @@ export async function updateAdminUser(
 }
 
 export async function deleteAdminUser(token: string, userId: number) {
-  return request<ApiMessage>(`/api/v1/auth/${userId}/`, {
+  return request<ApiMessage>(`/auth/${userId}/`, {
     method: "DELETE",
     token,
   });
 }
 
 export async function fetchAdminAccessTest(token: string, signal?: AbortSignal) {
-  return request<{ message: string }>("/api/v1/auth/admin/test/", {
+  return request<{ message: string }>("/auth/admin/test/", {
     token,
     signal,
   });
@@ -642,7 +648,7 @@ export async function updateCurrentUserProfile(
   body: UpdateProfilePayload,
   signal?: AbortSignal,
 ) {
-  return request<AdminUser>("/api/v1/auth/me/", {
+  return request<AdminUser>("/auth/me/", {
     method: "PATCH",
     token,
     body,
@@ -651,7 +657,7 @@ export async function updateCurrentUserProfile(
 }
 
 export async function changeCurrentUserEmail(token: string, newEmail: string) {
-  return request<ApiMessage>("/api/v1/auth/change-email/", {
+  return request<ApiMessage>("/auth/change-email/", {
     method: "POST",
     token,
     body: { new_email: newEmail },
@@ -663,7 +669,7 @@ export async function changeCurrentUserPassword(
   oldPassword: string,
   newPassword: string,
 ) {
-  return request<ApiMessage>("/api/v1/auth/change-password/", {
+  return request<ApiMessage>("/auth/change-password/", {
     method: "POST",
     token,
     body: { old_password: oldPassword, new_password: newPassword },
@@ -671,11 +677,11 @@ export async function changeCurrentUserPassword(
 }
 
 export async function fetchDeviceSessions(token: string, signal?: AbortSignal) {
-  return request<DeviceSessionRecord[]>("/api/v1/auth/sessions/", { token, signal });
+  return request<DeviceSessionRecord[]>("/auth/sessions/", { token, signal });
 }
 
 export async function revokeDeviceSession(token: string, sessionId: string) {
-  return request<ApiMessage>("/api/v1/auth/sessions/revoke/", {
+  return request<ApiMessage>("/auth/sessions/revoke/", {
     method: "POST",
     token,
     body: { session_id: sessionId },
@@ -683,14 +689,14 @@ export async function revokeDeviceSession(token: string, sessionId: string) {
 }
 
 export async function fetchLoginHistory(token: string, signal?: AbortSignal) {
-  return request<LoginHistoryEntry[]>("/api/v1/auth/login-history/", {
+  return request<LoginHistoryEntry[]>("/auth/login-history/", {
     token,
     signal,
   });
 }
 
 export async function fetchSecurityEvents(token: string, signal?: AbortSignal) {
-  return request<SecurityEventEntry[]>("/api/v1/auth/security-events/", {
+  return request<SecurityEventEntry[]>("/auth/security-events/", {
     token,
     signal,
   });

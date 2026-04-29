@@ -115,7 +115,7 @@ function hasAdminAccess(user?: AdminUser | null) {
     return false;
   }
 
-  return user.is_superuser || user.is_staff || user.role === "ADMIN";
+  return user.is_superuser;
 }
 
 function formatDate(value?: string | null) {

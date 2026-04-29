@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   ApiError,
+  clearStoredSession,
   login,
   setStoredSession,
   verifyTwoFactorLogin,
@@ -33,6 +34,12 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function completeLogin(session: AuthSession) {
+    if (!session.user.is_superuser) {
+      clearStoredSession();
+      toast.error("This dashboard is restricted to the superuser account.");
+      return;
+    }
+
     setStoredSession(session);
     toast.success("Connected to the upgraded backend.");
     router.push("/dashboard");
