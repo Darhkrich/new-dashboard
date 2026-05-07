@@ -44,7 +44,7 @@ export default function AuthGuard({ children }: { children: ReactNode }) {
   }, [router]);
 
   if (!ready) {
-    return <div className="p-6 text-sm text-slate-500">Checking your session...</div>;
+    return <div className="p-6 text-sm text-slate-500">Preparing your workspace...</div>;
   }
 
   return <>{children}</>;

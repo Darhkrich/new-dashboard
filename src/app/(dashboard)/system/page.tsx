@@ -141,7 +141,7 @@ export default function SystemPage() {
       <div>
         <h1 className="text-3xl font-bold">System</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Backend diagnostics for health, versions, admin access checks, metrics, and token tools.
+          Review platform health, service checks, release details, and operational status.
         </p>
       </div>
 

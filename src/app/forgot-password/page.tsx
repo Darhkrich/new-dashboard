@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold text-slate-950">Forgot Password</h1>
           <p className="text-sm text-slate-600">
-            Request a password reset link from the backend auth service.
+            Request a secure password reset link for your account.
           </p>
         </div>
 

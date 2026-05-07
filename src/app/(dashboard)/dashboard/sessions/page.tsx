@@ -101,7 +101,7 @@ export default function SessionsPage() {
       <div>
         <h1 className="text-2xl font-bold">Sessions & Activity</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Live data from the backend session, login history, and security event endpoints.
+          Review sign-ins, session history, and recent security activity in one place.
         </p>
       </div>
 

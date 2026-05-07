@@ -208,14 +208,14 @@ export default function SettingsPage() {
       <div>
         <h1 className="text-3xl font-bold">Settings</h1>
         <p className="mt-1 text-sm text-slate-500">
-          These forms now map directly to the backend profile, email, and password endpoints.
+          Keep your profile, sign-in details, and verification preferences up to date.
         </p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Profile Details</CardTitle>
-          <CardDescription>Updates your name with `PATCH /api/v1/auth/me/`.</CardDescription>
+          <CardDescription>Update the name shown across the operations workspace.</CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
@@ -242,9 +242,7 @@ export default function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Email Address</CardTitle>
-          <CardDescription>
-            Uses `POST /api/v1/auth/change-email/` so email changes actually reach the backend.
-          </CardDescription>
+          <CardDescription>Change the email address tied to your secure account.</CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">

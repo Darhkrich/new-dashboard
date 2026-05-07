@@ -41,7 +41,7 @@ export default function LoginPage() {
     }
 
     setStoredSession(session);
-    toast.success("Connected to the upgraded backend.");
+    toast.success("Signed in successfully.");
     router.push("/dashboard");
   }
 

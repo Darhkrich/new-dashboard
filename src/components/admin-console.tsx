@@ -31,7 +31,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  API_BASE_URL,
   ApiError,
   clearStoredSession,
   fetchAdminUsers,
@@ -209,7 +208,7 @@ export function AdminConsole() {
 
       startTransition(() => setPublicSnapshot({ live, ready, versions }));
     } catch (error) {
-      showError(error, "Unable to reach the backend public endpoints.");
+      showError(error, "We couldn't refresh service status right now.");
     }
   }
 
@@ -261,7 +260,7 @@ export function AdminConsole() {
         }),
       );
     } catch (error) {
-      showError(error, "Unable to load the authenticated admin data.");
+      showError(error, "We couldn't load your workspace right now.");
     } finally {
       setIsRefreshing(false);
     }
@@ -274,7 +273,7 @@ export function AdminConsole() {
       );
       setPrivateSnapshot((current) => ({ ...current, users }));
     } catch (error) {
-      showError(error, "Unable to load admin users.");
+      showError(error, "We couldn't load team accounts right now.");
     }
   }
 
@@ -314,7 +313,7 @@ export function AdminConsole() {
       setPassword("");
       setOtp("");
       setPendingTwoFactorUserId(null);
-      setStatusMessage("Backend connection established. Loading admin data...");
+      setStatusMessage("Signed in successfully. Preparing your dashboard...");
       await loadPrivateSnapshot(nextSession);
     } catch (error) {
       showError(error, "Sign-in failed.");
@@ -347,7 +346,7 @@ export function AdminConsole() {
       setOtp("");
       setPassword("");
       setPendingTwoFactorUserId(null);
-      setStatusMessage("Two-factor verification passed. Syncing dashboard...");
+      setStatusMessage("Verification complete. Preparing your dashboard...");
       await loadPrivateSnapshot(nextSession);
     } catch (error) {
       showError(error, "Two-factor verification failed.");
@@ -371,7 +370,7 @@ export function AdminConsole() {
       setSession(null);
       setPrivateSnapshot(emptyPrivateSnapshot);
       setPendingTwoFactorUserId(null);
-      setStatusMessage("Signed out from the admin dashboard.");
+      setStatusMessage("You have been signed out.");
     }
   }
 
@@ -431,31 +430,35 @@ export function AdminConsole() {
             <div className="max-w-3xl space-y-3">
               <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-medium uppercase tracking-[0.22em] text-sky-700">
                 <Activity className="size-3.5" />
-                Enterprise backend bridge
+                Operations center
               </div>
               <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-                Connect the upgraded backend to your admin dashboard.
+                Manage platform access, security, and activity from one place.
               </h1>
               <p className="max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
-                The dashboard now speaks directly to the Django enterprise API for login,
-                readiness checks, user management, security monitoring, and audit history.
+                Review team accounts, security signals, service health, and audit activity with
+                one secure superuser workspace.
               </p>
               <div className="flex flex-wrap gap-2">
-                <Pill label="Backend" value={API_BASE_URL} tone="emerald" />
+                <Pill
+                  label="Access"
+                  value={session ? "Secure session active" : "Sign in required"}
+                  tone="sky"
+                />
                 <Pill
                   label="Operator"
-                  value={session ? userDisplayName(session.user) : "Not signed in"}
-                  tone="sky"
+                  value={session ? userDisplayName(session.user) : "Awaiting sign-in"}
+                  tone="emerald"
                 />
               </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3">
-              <SmallCard title="Liveness" value={publicSnapshot?.live.status ?? "Loading"} />
-              <SmallCard title="Readiness" value={publicSnapshot?.ready.status ?? "Loading"} />
+              <SmallCard title="Liveness" value={publicSnapshot?.live.status ?? "Checking"} />
+              <SmallCard title="Readiness" value={publicSnapshot?.ready.status ?? "Checking"} />
               <SmallCard
                 title="API Version"
-                value={publicSnapshot?.versions.default ?? "Loading"}
+                value={publicSnapshot?.versions.default ?? "Checking"}
               />
             </div>
           </div>
@@ -486,7 +489,7 @@ export function AdminConsole() {
             <CardHeader>
               <CardTitle>Authentication</CardTitle>
               <CardDescription>
-                Sign in with an admin-capable account to unlock the protected backend endpoints.
+                Sign in with your superuser account to open the operations workspace.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -512,11 +515,11 @@ export function AdminConsole() {
                     {isSubmittingAuth ? (
                       <>
                         <LoaderCircle className="size-4 animate-spin" />
-                        Connecting...
+                        Signing in...
                       </>
                     ) : (
                       <>
-                        Connect backend
+                        Sign in
                         <ArrowRight className="size-4" />
                       </>
                     )}
@@ -598,8 +601,8 @@ export function AdminConsole() {
               )}
 
               <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-600">
-                Set `NEXT_PUBLIC_API_BASE_URL` if the Django server is not running on
-                `http://localhost:8000`.
+                Use your secure superuser credentials to review accounts, audit activity, and
+                platform security from this workspace.
               </div>
             </CardContent>
           </Card>
@@ -630,8 +633,7 @@ export function AdminConsole() {
                   <div>
                     <CardTitle>User Administration</CardTitle>
                     <CardDescription>
-                      Connected to the admin users endpoint with suspend, restore, and
-                      staff-toggle actions.
+                      Review accounts and manage access with suspend, restore, and staff controls.
                     </CardDescription>
                   </div>
                   <div className="flex w-full max-w-sm gap-2">
@@ -660,7 +662,7 @@ export function AdminConsole() {
                       {privateSnapshot.users.users.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={5} className="py-8 text-center text-slate-500">
-                            {session ? "No admin users returned yet." : "Sign in to load admin users."}
+                            {session ? "No accounts are available yet." : "Sign in to view accounts."}
                           </TableCell>
                         </TableRow>
                       ) : (
@@ -750,14 +752,14 @@ export function AdminConsole() {
 
               <Card className="border border-slate-200/90 bg-white/90">
                 <CardHeader>
-                  <CardTitle>Backend Health</CardTitle>
+                  <CardTitle>System Health</CardTitle>
                   <CardDescription>
-                    Readiness, database, cache, and version metadata.
+                    Availability, service checks, and release details.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <HealthRow label="Liveness" value={publicSnapshot?.live.status ?? "Loading"} />
-                  <HealthRow label="Readiness" value={publicSnapshot?.ready.status ?? "Loading"} />
+                  <HealthRow label="Liveness" value={publicSnapshot?.live.status ?? "Checking"} />
+                  <HealthRow label="Readiness" value={publicSnapshot?.ready.status ?? "Checking"} />
                   <HealthRow
                     label="Database"
                     value={publicSnapshot?.ready.checks.database ?? "Pending"}
@@ -766,7 +768,7 @@ export function AdminConsole() {
                   <HealthRow label="Version" value={publicSnapshot?.versions.default ?? "Pending"} />
                   <Button variant="outline" onClick={() => void loadPublicSnapshot()}>
                     <RefreshCw className="size-4" />
-                    Recheck backend
+                    Refresh status
                   </Button>
                 </CardContent>
               </Card>
@@ -821,7 +823,7 @@ export function AdminConsole() {
             <CardHeader>
               <CardTitle>Audit Trail</CardTitle>
               <CardDescription>
-                Login trend and recent audit log rows from the enterprise backend.
+                Login patterns and recent activity records for the platform.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -854,7 +856,7 @@ export function AdminConsole() {
                   {privateSnapshot.auditLogs.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={4} className="py-8 text-center text-slate-500">
-                        {session ? "No audit rows returned yet." : "Sign in to load audit logs."}
+                        {session ? "No recent activity is available yet." : "Sign in to view activity."}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -876,7 +878,7 @@ export function AdminConsole() {
         {isBootstrapping && (
           <div className="fixed inset-x-0 bottom-6 mx-auto flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 shadow-lg">
             <LoaderCircle className="size-4 animate-spin" />
-            Restoring your previous dashboard session...
+            Preparing your workspace...
           </div>
         )}
       </main>

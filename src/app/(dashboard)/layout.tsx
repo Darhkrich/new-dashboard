@@ -47,7 +47,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   }, [router]);
 
   if (!ready) {
-    return <div className="p-8 text-sm text-slate-500">Connecting dashboard...</div>;
+    return <div className="p-8 text-sm text-slate-500">Opening your dashboard...</div>;
   }
 
   return (

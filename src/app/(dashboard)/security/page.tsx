@@ -135,7 +135,7 @@ export default function SecurityPage() {
       <div>
         <h1 className="text-2xl font-bold">Security Dashboard</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Connected to the live backend monitoring, alert resolution, and unblock endpoints.
+          Monitor alerts, review suspicious activity, and manage access protections.
         </p>
       </div>
 

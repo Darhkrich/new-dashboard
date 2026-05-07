@@ -96,7 +96,7 @@ export default function DashboardPage() {
   }, []);
 
   if (loading) {
-    return <div className="p-8 text-gray-500">Loading dashboard...</div>;
+    return <div className="p-8 text-gray-500">Preparing dashboard...</div>;
   }
 
   return (
@@ -104,7 +104,7 @@ export default function DashboardPage() {
       <div>
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Live metrics wired to the upgraded backend security endpoints.
+          A clear view of account activity, access trends, and security signals.
         </p>
       </div>
 
@@ -128,7 +128,7 @@ export default function DashboardPage() {
         <CardContent>
           <div className="h-[320px] w-full">
             {snapshot.trend.length === 0 ? (
-              <p className="text-sm text-gray-500">No trend data returned by the backend.</p>
+              <p className="text-sm text-gray-500">No trend data is available yet.</p>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={snapshot.trend}>
@@ -174,7 +174,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {snapshot.topIps.length === 0 ? (
-              <p className="text-sm text-gray-500">No attack-source data returned.</p>
+              <p className="text-sm text-gray-500">No threat activity is available right now.</p>
             ) : (
               snapshot.topIps.map((ip) => (
                 <div
@@ -196,7 +196,7 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent className="space-y-3">
           {snapshot.blockedIps.length === 0 ? (
-            <p className="text-sm text-gray-500">No blocked IPs returned.</p>
+            <p className="text-sm text-gray-500">No blocked IPs to review right now.</p>
           ) : (
             snapshot.blockedIps.map((entry) => (
               <div
