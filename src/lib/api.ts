@@ -1,11 +1,12 @@
-
-const DEFAULT_API_BASE_URL = (
-  process.env.NEXT_PUBLIC_BOEM_API_BASE_URL || "https://backend-devmasters.onrender.com/api/v1"
+const RAW_API_BASE_URL = (
+  process.env.NEXT_PUBLIC_BOEM_API_BASE_URL ??
+  "https://backend-devmasters.onrender.com"
 ).replace(/\/+$/, "");
 
-export const API_BASE_URL = RAW_API_BASE_URL.endsWith("/api/v1")
-  ? RAW_API_BASE_URL
-  : `${RAW_API_BASE_URL}/api/v1`;
+export const API_BASE_URL =
+  RAW_API_BASE_URL.endsWith("/api/v1")
+    ? RAW_API_BASE_URL
+    : `${RAW_API_BASE_URL}/api/v1`;
 
 const SESSION_STORAGE_KEY = "admin-dashboard.session";
 
@@ -275,7 +276,7 @@ async function request<T>(path: string, options: RequestOptions = {}) {
     method,
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
-    credentials: "include",
+    credentials: "omit",
     signal,
   });
 
